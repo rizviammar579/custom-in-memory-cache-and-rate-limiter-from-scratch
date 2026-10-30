@@ -1,6 +1,4 @@
 #include <iostream>
-#include <stdexcept>
-#include "./lru-cache/lru_cache.h"
 
 using namespace std;
 

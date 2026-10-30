@@ -7,13 +7,14 @@
 #include <chrono>
 #include <stdexcept>
 
+using Clock = std::chrono::steady_clock;
+using TimePoint = Clock::time_point;
+
+
 class SlidingWindowRateLimiter
 {
     int maxRequests;
     std::chrono::seconds windowDuration;
-
-    using Clock = std::chrono::steady_clock;
-    using TimePoint = Clock::time_point;
 
     std::unordered_map<std::string, std::deque<TimePoint>> requests;
 
@@ -28,6 +29,8 @@ public:
     }
 
     bool allowRequest(const std::string &clientID , TimePoint now = Clock::now());
+
+    void printDeque(const std::string &clientID);
 
 };
 

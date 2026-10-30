@@ -198,15 +198,15 @@ void testRepeatedAccessChangesEviction()
 
 int main()
 {
-    // testLRUCache();
-    // testUpdatingExistingKey();
-    // testCapacityOne();
-    // testInvalidCapacity();
-    // testEmptyStringValue();
-    // testMissingKey();
+    testLRUCache();
+    testUpdatingExistingKey();
+    testCapacityOne();
+    testInvalidCapacity();
+    testEmptyStringValue();
+    testMissingKey();
     testRepeatedAccessChangesEviction();
 
-    // cout << "\nALL LRU CACHE TESTS PASSED!\n";
+    cout << "\nALL LRU CACHE TESTS PASSED!\n";
 
     return 0;
 }
