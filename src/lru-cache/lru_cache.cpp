@@ -95,8 +95,8 @@ void LRUCache::insertAfterHead(Node *node)
 
 // finds for the key in cache/map
 // if key found -> update mru and return value
-// if not found -> return -1;
-int LRUCache::get(int key)
+// if not found -> return nullopt;
+optional<string> LRUCache::get(const string &key)
 {
     auto it = cache.find(key);
 
@@ -110,7 +110,7 @@ int LRUCache::get(int key)
         return targetNode->value;
     }
     else
-        return -1;
+        return nullopt;
 }
 
 // checks the cache/map for the key
@@ -119,7 +119,7 @@ int LRUCache::get(int key)
 // if capacity full -> remove lru from DLL and cache and deletes the node
 // then add a new node in DLL, updates mru and add a new (key, value) pair in cache/map
 
-void LRUCache::put(int key, int value)
+void LRUCache::put(const string &key, const string &value)
 {
 
     auto it = cache.find(key);
