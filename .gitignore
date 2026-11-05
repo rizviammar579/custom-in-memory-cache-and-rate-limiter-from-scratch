@@ -39,3 +39,15 @@ desktop.ini
 *.log
 tmp/
 temp/
+
+# Node.js dependencies
+node_modules/
+express-backend/node_modules/
+
+# TypeScript compiled output
+express-backend/dist/
+
+# Environment variables
+.env
+.env.*
+!.env.example
