@@ -19,6 +19,8 @@ endif()
 # Main HTTP server application
 add_executable(cache_rate_limiter
     src/main.cpp
+    src/lru-cache/lru_cache.cpp
+    src/sliding-window-rate-limiter/sliding_window_rate_limiter.cpp
 )
 
 target_include_directories(cache_rate_limiter PRIVATE
