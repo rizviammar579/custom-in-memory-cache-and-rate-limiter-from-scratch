@@ -9,18 +9,31 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+if(WIN32)
+    add_compile_definitions(
+        _WIN32_WINNT=0x0A00
+        WINVER=0x0A00
+    )
+endif()
 
-# Main application
-# add_executable(cache_rate_limiter
-#     src/main.cpp
-# )
+# Main HTTP server application
+add_executable(cache_rate_limiter
+    src/main.cpp
+)
 
-# target_include_directories(cache_rate_limiter PRIVATE
-#     src/lru-cache
-#     src/sliding-window-rate-limiter
-# )
+target_include_directories(cache_rate_limiter PRIVATE
+    third_party
+    src/lru-cache
+    src/sliding-window-rate-limiter
+)
 
-# Separate test executable
+if(WIN32)
+    target_link_libraries(cache_rate_limiter PRIVATE ws2_32)
+endif()
+
+
+
+# LRUCache test executable
 add_executable(lru_cache_tests
     tests/lru_cache_tests.cpp
     src/lru-cache/lru_cache.cpp
@@ -30,7 +43,7 @@ target_include_directories(lru_cache_tests PRIVATE
     src/lru-cache
 )
 
-# Separate test executable
+# SlidingWindowRateLimiter test executable
 add_executable(sliding_window_rate_limiter_tests
     tests/sliding_window_rate_limiter_tests.cpp
     src/sliding-window-rate-limiter/sliding_window_rate_limiter.cpp
