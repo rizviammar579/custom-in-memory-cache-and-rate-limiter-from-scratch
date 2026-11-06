@@ -1,6 +1,7 @@
 import express from 'express';
 import "dotenv/config"
 import type { Request, Response } from 'express';
+import { pool } from './db.js'
 
 const secretKey = process.env.CPP_SERVER_SECRET_KEY;
 
@@ -12,17 +13,6 @@ const app = express();
 
 app.use(express.json());
 
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-}
-
-const products: Product[] = [
-    { id: 1, name: "Laptop", price: 55000 },
-    { id: 2, name: "Keyboard", price: 1500 },
-    { id: 3, name: "Mouse", price: 800 }
-];
 
 app.get("/", (req: Request, res: Response) => {
     res.status(200).json({
@@ -30,8 +20,46 @@ app.get("/", (req: Request, res: Response) => {
     });
 })
 
-app.get("/api/products", (req: Request, res: Response) => {
-    res.status(200).json(products);
+app.get("/db-health", async (req: Request, res: Response) => {
+
+    try {
+        const result = await pool.query("SELECT NOW()");
+
+        res.status(200).json({
+            message: "Neon PostgreSQL connected!",
+            time: result.rows[0].now
+        })
+    } catch (error) {
+
+        console.error("Database connection failed:", error);
+
+        res.status(500).json({
+            message: "Database connection failed!"
+        })
+
+    }
+
+})
+
+app.get("/api/products", async (req: Request, res: Response) => {
+
+    try {
+        const result = await pool.query(
+            "SELECT * FROM products ORDER BY id"
+        );
+
+        res.status(200).json(result.rows)
+
+    } catch (error) {
+
+        console.error("Database query failed:", error);
+
+        res.status(500).json({
+            message: "Failed to fetch products"
+        })
+
+    }
+
 })
 
 const PORT = 3000;
