@@ -1,5 +1,6 @@
 import express from 'express';
 import "dotenv/config"
+import axios from 'axios';
 import type { Request, Response } from 'express';
 import { pool } from './db.js'
 
@@ -43,24 +44,109 @@ app.get("/db-health", async (req: Request, res: Response) => {
 
 app.get("/api/products", async (req: Request, res: Response) => {
 
+    const clientIP = req.ip;
+
+    if (!clientIP) return res.status(400).json({
+        message: "Bad Request: Client IP missing"
+    })
+
+    const cacheKey = `${req.method}:${req.originalUrl}`;
+
+    const cacheUrl = "http://127.0.0.1:8081/cache";
+
+    let dbResult;
+    let cacheResponse;
+    let message;
+    
+    enum cacheStatuses {
+        HIT = "hit",
+        MISS = "miss",
+        BYPASS = "bypass",
+    }
+
+    let cacheStatus: cacheStatuses = cacheStatuses.MISS;
+
     try {
-        const result = await pool.query(
+        cacheResponse = await axios.get(cacheUrl, {
+            params: {
+                ip: clientIP,
+                key: cacheKey
+            },
+            headers: {
+                "CPP_SERVER_SECRET_KEY": secretKey
+            },
+            validateStatus: () => true
+        })
+
+        if (cacheResponse.status === 429) return res.status(429).json({
+            message: "Too Many Requests : Rate limit exceeded"
+        })
+
+        if (cacheResponse.status == 200) return res.status(200).json({
+            data: cacheResponse.data,
+            cache: cacheStatuses.HIT
+        })
+
+        if (cacheResponse.status !== 404) {
+            console.error(
+                "Unexpected C++ response:",
+                cacheResponse.status
+            );
+            cacheStatus = cacheStatuses.BYPASS
+        }
+
+    }
+    catch (error) {
+        console.log("C++ cache request failed!");
+        cacheStatus = cacheStatuses.BYPASS;
+    }
+
+    try {
+
+        dbResult = await pool.query(
             "SELECT * FROM products ORDER BY id"
         );
 
-        res.status(200).json(result.rows)
-
     } catch (error) {
 
-        console.error("Database query failed:", error);
-
-        res.status(500).json({
-            message: "Failed to fetch products"
+        return res.status(500).json({
+            message: "Failed to fetch from database",
+            cache: cacheStatus
         })
 
     }
 
+    try {
+
+        const cachePopulate = await axios.post(cacheUrl,
+            dbResult.rows,
+            {
+                params: {
+                    key: cacheKey
+                },
+                headers: {
+                    "CPP_SERVER_SECRET_KEY": secretKey
+                },
+                validateStatus: () => true
+            })
+
+        if (cachePopulate.status === 200) message = "Cache Populated";
+
+        else throw new Error("Cache not populated");
+
+    } catch (error) {
+        message = "Cache not populated"
+    }
+
+    return res.status(200).json({
+        data: dbResult.rows,
+        cache: cacheStatus,
+        message: message
+    })
+  
+
 })
+
 
 const PORT = 3000;
 
