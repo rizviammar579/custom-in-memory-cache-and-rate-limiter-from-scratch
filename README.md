@@ -460,9 +460,14 @@ git clone https://github.com/rizviammar579/custom-in-memory-cache-and-rate-limit
 cd custom-in-memory-cache-and-rate-limiter-from-scratch
 ```
 
-### Build the C++ server
+### Build the C++ Server
 
 ```bash
+# Generic (CMake default generator)
+cmake -S . -B build
+cmake --build build
+
+# Windows (MinGW)
 cmake -S . -B build -G "MinGW Makefiles"
 cmake --build build
 ```
