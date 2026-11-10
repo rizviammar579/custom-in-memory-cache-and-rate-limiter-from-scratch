@@ -99,9 +99,9 @@ export const cacheService = async (clientIP: string, cacheKey: string, query: st
                 validateStatus: () => true
             })
 
-        if (cachePopulate.status === 200) message = "Cache Populated";
+        if (cachePopulate.status === 200) message = "Cache Populated after DB query";
 
-        else throw new Error("Cache not populated");
+        else throw new Error("Cache not populated after DB query");
 
     } catch (error) {
         message = "Cache not populated"
